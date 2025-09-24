@@ -1,0 +1,1166 @@
+{
+  "info": {
+    "name": "NexusCommerce API Collection",
+    "description": "Complete API collection for NexusCommerce e-commerce backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "api_version",
+      "value": "v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cart_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "test_email",
+      "value": "test@nexuscommerce.com",
+      "type": "string"
+    },
+    {
+      "key": "test_password",
+      "value": "name123",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@nexus.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "admin123",
+      "type": "string"
+    },
+    {
+      "key": "shipping_address_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "billing_address_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "payment_method_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "product_variant_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "category_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "brand_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Basic Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/health/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "health", ""]
+            }
+          }
+        },
+        {
+          "name": "Detailed Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/health/detailed/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "health", "detailed", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "User Registration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"password_confirm\": \"{{test_password}}\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/register/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "register", ""]
+            }
+          }
+        },
+        {
+          "name": "Email Verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"otp_code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/verify-email/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "verify-email", ""]
+            }
+          }
+        },
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.tokens.access);",
+                  "    pm.collectionVariables.set('refresh_token', response.tokens.refresh);",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "Token Refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.access);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "refresh", ""]
+            }
+          }
+        },
+        {
+          "name": "User Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/logout/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "logout", ""]
+            }
+          }
+        },
+        {
+          "name": "Password Reset Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/password-reset/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "password-reset", ""]
+            }
+          }
+        },
+        {
+          "name": "Password Reset Confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset_token_here\",\n  \"password\": \"NewSecurePass123!\",\n  \"password_confirm\": \"NewSecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/password-reset-confirm/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "password-reset-confirm", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Smith\",\n  \"phone\": \"+1234567890\",\n  \"date_of_birth\": \"1990-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"{{test_password}}\",\n  \"new_password\": \"NewSecurePass123!\",\n  \"new_password_confirm\": \"NewSecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/change-password/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "change-password", ""]
+            }
+          }
+        },
+        {
+          "name": "Get User Addresses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/addresses/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "addresses", ""]
+            }
+          }
+        },
+        {
+          "name": "Create User Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"shipping\",\n  \"street\": \"123 Main St\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"postal_code\": \"10001\",\n  \"country\": \"USA\",\n  \"is_default\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/auth/addresses/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "auth", "addresses", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/?page=1&page_size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/search/?q=wireless headphones&category=1&min_price=50&max_price=200",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "search", ""],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "wireless headphones"
+                },
+                {
+                  "key": "category",
+                  "value": "1"
+                },
+                {
+                  "key": "min_price",
+                  "value": "50"
+                },
+                {
+                  "key": "max_price",
+                  "value": "200"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('product_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Product Variants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/{{product_id}}/variants/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "{{product_id}}", "variants", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Product Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/{{product_id}}/reviews/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "{{product_id}}", "reviews", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Product Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product\": {{product_id}},\n  \"rating\": 5,\n  \"title\": \"Great product!\",\n  \"comment\": \"Really happy with this purchase. Excellent quality and fast shipping.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/reviews/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "reviews", ""]
+            }
+          }
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/categories/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "categories", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopping Cart",
+      "item": [
+        {
+          "name": "Get Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('cart_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Cart Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/summary/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", "summary", ""]
+            }
+          }
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_variant\": {{product_variant_id}},\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/items/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", "items", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/items/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", "items", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/items/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", "items", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Validate Cart",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/validate/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", "validate", ""]
+            }
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/carts/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "carts", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('order_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipping_address\": {{shipping_address_id}},\n  \"billing_address\": {{billing_address_id}},\n  \"payment_method\": \"credit_card\",\n  \"notes\": \"Please deliver during business hours\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", ""]
+            }
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/{{order_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "{{order_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Order Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/{{order_id}}/items/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "{{order_id}}", "items", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\",\n  \"notes\": \"Order shipped via FedEx\",\n  \"tracking_number\": \"1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/{{order_id}}/status/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "{{order_id}}", "status", ""]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Customer requested cancellation\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/{{order_id}}/cancel/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "{{order_id}}", "cancel", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Order Tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/{{order_id}}/tracking/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "{{order_id}}", "tracking", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/methods/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "methods", ""]
+            }
+          }
+        },
+        {
+          "name": "Add Payment Method",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"credit_card\",\n  \"provider\": \"stripe\",\n  \"provider_payment_method_id\": \"pm_1234567890\",\n  \"is_default\": true,\n  \"metadata\": {\n    \"card_last_four\": \"4242\",\n    \"card_brand\": \"visa\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/methods/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "methods", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('payment_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order\": {{order_id}},\n  \"payment_method\": {{payment_method_id}},\n  \"amount\": \"99.99\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", ""]
+            }
+          }
+        },
+        {
+          "name": "Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/{{payment_id}}/process/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "{{payment_id}}", "process", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/{{payment_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "{{payment_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/{{payment_id}}/status/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "{{payment_id}}", "status", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment\": {{payment_id}},\n  \"amount\": \"50.00\",\n  \"reason\": \"Customer requested refund\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/refunds/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "refunds", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Refunds",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/payments/refunds/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "payments", "refunds", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", ""]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notification_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/mark-read/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "mark-read", ""]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/mark-all-read/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "mark-all-read", ""]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Preferences",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/preferences/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "preferences", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Notification Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": [\n    {\n      \"category\": \"order_updates\",\n      \"channel\": \"email\",\n      \"is_enabled\": true,\n      \"frequency\": \"immediate\"\n    },\n    {\n      \"category\": \"marketing\",\n      \"channel\": \"email\",\n      \"is_enabled\": false\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/preferences/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "preferences", ""]
+            }
+          }
+        },
+        {
+          "name": "Unsubscribe from Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"marketing\",\n  \"channel\": \"email\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/unsubscribe/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "unsubscribe", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Endpoints",
+      "item": [
+        {
+          "name": "List All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/admin/?status=pending&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "admin", ""],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Analytics (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/orders/analytics/?period=month",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "orders", "analytics", ""],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Notification Templates (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/templates/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "templates", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Notification Template (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"order_shipped_email\",\n  \"type\": \"email\",\n  \"category\": \"order_updates\",\n  \"subject\": \"Your order #{{order_number}} has been shipped!\",\n  \"body\": \"Hi {{user_name}}, your order has been shipped and is on its way!\",\n  \"html_body\": \"<h1>Order Shipped!</h1><p>Hi {{user_name}}, your order has been shipped!</p>\",\n  \"variables\": [\"user_name\", \"order_number\", \"tracking_number\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/templates/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "templates", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Analytics (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/notifications/analytics/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "notifications", "analytics", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

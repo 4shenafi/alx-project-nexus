@@ -47,6 +47,3 @@ staticfiles/
 # Other
 .DS_Store
 
-ecommerce_beckend/.coverage
-ecommerce_beckend/htmlcov/
-ecommerce_beckend/logs/

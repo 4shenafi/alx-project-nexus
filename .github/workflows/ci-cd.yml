@@ -1,0 +1,188 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_nexuscommerce
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        cd ecommerce_beckend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest-cov coverage
+    
+    - name: Set up environment variables
+      run: |
+        echo "SECRET_KEY=test-secret-key-for-ci" >> $GITHUB_ENV
+        echo "DEBUG=True" >> $GITHUB_ENV
+        echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> $GITHUB_ENV
+        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_nexuscommerce" >> $GITHUB_ENV
+        echo "REDIS_URL=redis://localhost:6379/0" >> $GITHUB_ENV
+        echo "CELERY_BROKER_URL=redis://localhost:6379/1" >> $GITHUB_ENV
+        echo "CELERY_RESULT_BACKEND=redis://localhost:6379/2" >> $GITHUB_ENV
+        echo "EMAIL_HOST_USER=test@example.com" >> $GITHUB_ENV
+        echo "EMAIL_HOST_PASSWORD=test-password" >> $GITHUB_ENV
+        echo "EMAIL_HOST=smtp.gmail.com" >> $GITHUB_ENV
+        echo "EMAIL_PORT=587" >> $GITHUB_ENV
+        echo "EMAIL_USE_TLS=True" >> $GITHUB_ENV
+    
+    - name: Create necessary directories
+      run: |
+        cd ecommerce_beckend
+        mkdir -p logs
+        mkdir -p htmlcov
+    
+    - name: Run migrations
+      run: |
+        cd ecommerce_beckend
+        python manage.py migrate
+    
+    - name: Run tests with coverage
+      run: |
+        cd ecommerce_beckend
+        pytest tests/test_simple.py --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing -v
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./ecommerce_beckend/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./ecommerce_beckend/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd ecommerce_beckend
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+    
+    - name: Run Black
+      run: |
+        cd ecommerce_beckend
+        black --check --diff .
+    
+    - name: Run isort
+      run: |
+        cd ecommerce_beckend
+        isort --check-only --diff .
+    
+    - name: Run Flake8
+      run: |
+        cd ecommerce_beckend
+        flake8 .
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd ecommerce_beckend
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Run Bandit Security Linter
+      run: |
+        cd ecommerce_beckend
+        bandit -r . -f json -o bandit-report.json || true
+    
+    - name: Run Safety Check
+      run: |
+        cd ecommerce_beckend
+        safety check --json --output safety-report.json || true
+
+  deploy:
+    needs: [test, lint, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: 22
+        script: |
+          cd /home/sebezadmin/alx-project-nexus/ecommerce_beckend
+          git pull origin main
+          docker-compose down
+          docker-compose build --no-cache
+          docker-compose up -d
+          docker-compose logs -f --tail=50
